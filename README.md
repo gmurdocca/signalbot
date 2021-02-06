@@ -50,7 +50,9 @@ Note you can specify an optional `--pin <PIN>` if there is a Signal security pin
 signal-cli -u <phone_number> send -m "test message" <phone_number>
 ```
 
-4. set a profile
+4. Set a profile
+<name_of_bot_in_Signal> will be the bot's name in the group chat in Signal.
+
 ```
 signal-cli -u <phone_number> updateProfile --name <name_of_bot_in_Signal>
 ```

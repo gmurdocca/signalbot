@@ -31,12 +31,12 @@ Install geckodriver: https://github.com/mozilla/geckodriver
 ## Configure signal-cli and start SignalBot
 
 1. Register the bot with Signal. 
-To  get  the value for <captcha_id> token, go to https://signalcaptchas.org/registration/generate.html then use your browser's developer tools to check for a redirect starting with signalcaptcha://. Everything after signalcaptcha:// is the captcha token.
+To  get the value for <captcha_token>, go to https://signalcaptchas.org/registration/generate.html then use your browser's developer tools to check for a redirect starting with signalcaptcha://. Everything after signalcaptcha:// is the captcha token.
 
 The <phone_number> must be in international format and must include the country calling code. Hence it should start with a "+" sign. It also should be a unique phone number, eg a land line, etc.
 
 ```
-signal-cli -u <phone_number> register --voice --captcha <captcha_id>
+signal-cli -u <phone_number> register --voice --captcha <captcha_token>
 ```
 
 2. Wait for a phone call and note the PIN that is given. Verify using command.

@@ -57,7 +57,7 @@ signal-cli -u <phone_number> send -m "test message" <phone_number>
 signal-cli -u <phone_number> updateProfile --name <name_of_bot_in_Signal>
 ```
 
-5. Join a signal Group. Get group id from Signal app in group settings.
+5. Join one or more signal Groups. Get group id from Signal app in group settings.
 ```
 signal-cli -u <phone_number> joinGroup --uri 'https://signal.group/<group_id>'
 ```
@@ -65,7 +65,10 @@ signal-cli -u <phone_number> joinGroup --uri 'https://signal.group/<group_id>'
 ```
 signal-cli -u <phone_number> send -m "hello world" -g <group_id>
 ```
-7. Update signalbot.py and set USER and GROUP variables to <phone_number> and <group_id> respectively.
+7. Create a file named `.env` in the root of this project and set its contents to:
+```
+SIGNAL_USER=<phone_number>
+```
 8. Start the bot:
 ```
 python3 signalbot.py

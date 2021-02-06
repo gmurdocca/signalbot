@@ -1,3 +1,5 @@
-cleverbotfree==1.2.7
 better-profanity==0.7.0
-
+cleverbotfree==1.2.7
+python-dotenv==0.15.0
+selenium==3.141.0
+urllib3==1.26.3

@@ -5,6 +5,7 @@ Bot Commands:
 Chat to the bot in Signal using the below commands:
 
 Get current price in USD for a crypto symbol: `!sb getprice <symbol>`
+
 Chat with an AI (cleverbot): `!sb chat <some message>`
 
 # Installation: 

@@ -12,14 +12,14 @@ Chat with an AI (cleverbot): `!sb chat <some message>`
 
 ## install deps:
 
-Note: These are best wrapped in a docker image. Manual install process is:
+Note: These are best wrapped in a Docker image. Manual install process is:
 
 Install npm deps:
 ```
 npm -g install coinmon
 ```
 
-Install Python deps:
+Install Python deps (consider using a virtualenv if not Docker):
 ```
 pip3 install requirements.txt
 ```

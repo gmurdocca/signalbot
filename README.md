@@ -1,16 +1,17 @@
 # SignalBot: A basic Signal bot
 
-Bot Commands:
+A crude and simple Signal bot that wraps `signal-cli` for integreation with Signal private messenger, `coinmon` for retrieving latest crypto prices and CleverBot API for chatting to an AI.
+
+## Bot Commands:
 
 Chat to the bot in Signal using the below commands:
 
-Get current price in USD for a crypto symbol: `!sb getprice <symbol>`
-
-Chat with an AI (cleverbot): `!sb chat <some message>`
+- Get current price in USD for a crypto symbol: `!sb getprice <symbol>`
+- Chat with an AI (CleverBot): `!sb chat <some message>`
 
 # Installation: 
 
-## install deps:
+## Install deps:
 
 Note: These are best wrapped in a Docker image. Manual install process is:
 

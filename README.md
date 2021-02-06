@@ -1,6 +1,6 @@
 # SignalBot: A basic Signal bot
 
-A crude and simple Signal bot that wraps `signal-cli` for integreation with Signal private messenger, `coinmon` for retrieving latest crypto prices and CleverBot API for chatting to an AI.
+A crude and simple Signal bot that wraps `signal-cli` for integration with Signal private messenger, `coinmon` for retrieving latest crypto prices and CleverBot API for chatting to an AI.
 
 ## Bot Commands:
 

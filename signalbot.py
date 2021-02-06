@@ -65,7 +65,7 @@ def action_commands(commands):
             result = p.stdout.read().decode('utf-8').strip()
             send_message(f"1 {symbol} = USD ${result}")
         elif command.lower() == "help":
-            send_message("get a crypto price: !db gp <symbol>\nchat with me: !db chat <some message>")
+            send_message("get a crypto price: !sb gp <symbol>\nchat with me: !sb chat <some message>")
         elif command.lower().startswith("chat"):
             text = command[4:].strip()
             response = cb.single_exchange(text)

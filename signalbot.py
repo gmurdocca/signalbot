@@ -34,7 +34,11 @@ SIGNAL_USER = os.getenv("SIGNAL_USER")
 HELP_TEXT = """
         Commands I understand:\n
         Get a crypto price:    !sb gp <symbol>
-        Chat with me:    !sb <some message>"""
+        Chat with me:    !sb <some message>
+
+        See coincap.io for supported symbols
+        """
+
 
 
 def send_message(message, from_user, target):
@@ -124,7 +128,7 @@ def action_commands(commands):
                 if result:
                     message = f"1 {symbol} = USD ${result}"
                 else:
-                    message = f"I've got no info about crypto symbol '{symbol}'"
+                    message = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
                 send_message(message, SIGNAL_USER, target)
             else:
                 response = cb.single_exchange(message)

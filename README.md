@@ -7,7 +7,7 @@ A crude and simple Signal bot that wraps `signal-cli` for integration with Signa
 Chat to the bot in Signal using the below commands:
 
 - Get current price in USD for a crypto symbol: `!sb getprice <symbol>`
-- Chat with an AI (CleverBot): `!sb chat <some message>`
+- Chat with an AI (CleverBot): `!sb <some message>`
 
 # Installation: 
 

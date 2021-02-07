@@ -8,34 +8,56 @@ import logging
 import time
 from collections import defaultdict
 from pathlib import Path
+import textwrap
 
 import cleverbotfree.cbfree
 from better_profanity import profanity
 import dotenv
 
-CONTROL_PREFIXES = ["!signalbot ", "!sb ", "!dojobot ", "!db "]
+CONTROL_PREFIXES = ["!signalbot", "!sb", "!dojobot", "!db"]
+LOGLEVEL = logging.INFO
 
 cb = cleverbotfree.cbfree.Cleverbot()
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(LOGLEVEL)
 
 handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
+handler.setLevel(LOGLEVEL)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 dotenv.load_dotenv(dotenv_path=Path('.') / '.env')
 SIGNAL_USER = os.getenv("SIGNAL_USER")
+HELP_TEXT = """Commands I understand:
+           Get a crypto price:    !sb gp <symbol>
+           Chat with me:    !sb <some message>"""
 
-
-def send_message(message, user, group):
-    message = message.replace("'", "")
-    logger.info(f"sending: {group}: {message}")
-    cmd = f'''signal-cli -u {user} send -m '{message}' -g "{group}"'''
+def send_message(message, from_user, target):
+    message = message.replace("'", r"'\''")
+    logger.info(f"Sending message to: {target}: {message}")
+    if target.startswith("+"):
+        # direct chat
+        cmd = f'''signal-cli -u {from_user} send -m '{message}' {target}'''
+    else:
+        # group chat
+        cmd = f'''signal-cli -u {from_user} send -m '{message}' -g "{target}"'''
+    logger.debug(f"running command: {cmd}")
     subprocess.call(cmd, shell=True)
     
+
+def strip_control_prefix(message):
+    prefix = has_control_prefix(message)
+    if prefix:
+        message = message.split(prefix, 1)[1].strip()
+    return message
+
+def has_control_prefix(message):
+    for CONTROL_PREFIX in CONTROL_PREFIXES:
+        if message.startswith(f"{CONTROL_PREFIX} "):
+            return CONTROL_PREFIX
+    return False
 
 def parse_commands(messages):
     commands = defaultdict(list)
@@ -43,16 +65,32 @@ def parse_commands(messages):
         if raw_message.strip():
             try:
                 raw_message = json.loads(raw_message)
+                logger.debug(f"raw_message: {raw_message}")
             except json.decoder.JSONDecodeError as e:
                 logger.warning(f"Malformed message (skipping): {raw_message}")
                 continue
+            source = raw_message.get("envelope", {}).get("source")
             message = raw_message.get("envelope", {}).get("dataMessage", {}).get("message") or ""
             message = message.strip()
+            logger.debug(f"source: {source} ; message: {message}")
+            if source == SIGNAL_USER or not message:
+                # ignore our own direct chat messages or empty messages
+                logger.debug(f"Ignoring message from {source}: {message}")
+                continue
             group_id = raw_message.get("envelope", {}).get("dataMessage", {}).get("groupInfo", {}).get("groupId") or ""
-            for CONTROL_PREFIX in CONTROL_PREFIXES:
-                if message.startswith(CONTROL_PREFIX):
-                    command = message.split(' ', 1)[1]
-                    commands[group_id].append(command)
+            if group_id:
+                # this was a group message
+                logger.debug("got a group message")
+                source = group_id
+                if has_control_prefix(message):
+                    commands[source].append(strip_control_prefix(message))
+            else:
+                # this was a direct message
+                logger.debug("got a direct message")
+                prefix = has_control_prefix(message)
+                if prefix:
+                    send_message(f"BTW, you can drop the {prefix} when direct messaging me.", SIGNAL_USER, source)
+                commands[source].append(strip_control_prefix(message))
     if  commands:
         logger.info(f"received commands: {commands}")
     return commands
@@ -64,25 +102,22 @@ def action_commands(commands):
             logger.info(f"processing command: {command}")
             if profanity.contains_profanity(command):
                 send_message("Don't be rude or I'll eat all your crypto.", SIGNAL_USER, group_id)
+            elif command.lower() == "help":
+                send_message(textwrap.dedent(HELP_TEXT), SIGNAL_USER, group_id)
             elif command.startswith("getprice") or command.startswith("gp"):
                 sep = command.startswith("gp") and "gp" or "getprice"
                 symbol = command.split(sep)[1].strip()
                 if not 3 <= len(symbol) <= 4  or not symbol.isalpha():
                     send_message("Symbol must contain alpha characters only and be 3 or 4 characters in length.", SIGNAL_USER, group_id)
                     continue
-                logger.info(f"********* fetching price for symbol: {symbol}")
+                logger.debug(f"Fetching price for symbol: {symbol}")
                 p = subprocess.Popen(f"""coinmon -f {symbol} | tail -n2 | head -n1 | awk '{{print $6}}'""", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
                 result = p.stdout.read().decode('utf-8').strip()
                 send_message(f"1 {symbol} = USD ${result}", SIGNAL_USER, group_id)
-            elif command.lower() == "help":
-                send_message("get a crypto price: !sb gp <symbol>\nchat with me: !sb chat <some message>", SIGNAL_USER, group_id)
-            elif command.lower().startswith("chat"):
-                text = command[4:].strip()
-                response = cb.single_exchange(text)
-                send_message(response, SIGNAL_USER, group_id)
             else:
-                send_message(f"unrecognised command: {command}", SIGNAL_USER, group_id)
+                response = cb.single_exchange(command)
+                send_message(response, SIGNAL_USER, group_id)
 
 
 def get_messages():
@@ -101,5 +136,5 @@ if __name__ == "__main__":
         commands = parse_commands(input_data)
         if commands:
             action_commands(commands)
-        time.sleep(1)
+        time.sleep(2)
 

@@ -62,8 +62,12 @@ signal-cli -u <phone_number> updateProfile --name <name_of_bot_in_Signal>
 ```
 signal-cli -u <phone_number> joinGroup --uri 'https://signal.group/<group_id>'
 ```
-6. Send a test group message:
+6. Send a test message:
 ```
+# to a user
+signal-cli -u <phone_number> send -m "hello world" <recipient_phone_number>
+
+# to a group
 signal-cli -u <phone_number> send -m "hello world" -g <group_id>
 ```
 7. Create a file named `.env` in the root of this project and set its contents to:

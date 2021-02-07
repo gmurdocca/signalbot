@@ -22,7 +22,7 @@ npm -g install coinmon
 
 Install Python deps (consider using a virtualenv if not Docker):
 ```
-pip3 install requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Install signal-cli: https://github.com/AsamK/signal-cli

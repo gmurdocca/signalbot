@@ -16,6 +16,7 @@ import dotenv
 
 CONTROL_PREFIXES = ["!signalbot", "!sb", "!dojobot", "!db"]
 LOGLEVEL = logging.INFO
+SLEEP = 2
 
 cb = cleverbotfree.cbfree.Cleverbot()
 
@@ -30,9 +31,11 @@ logger.addHandler(handler)
 
 dotenv.load_dotenv(dotenv_path=Path('.') / '.env')
 SIGNAL_USER = os.getenv("SIGNAL_USER")
-HELP_TEXT = """Commands I understand:
-           Get a crypto price:    !sb gp <symbol>
-           Chat with me:    !sb <some message>"""
+HELP_TEXT = """
+        Commands I understand:\n
+        Get a crypto price:    !sb gp <symbol>
+        Chat with me:    !sb <some message>"""
+
 
 def send_message(message, from_user, target):
     message = message.replace("'", r"'\''")
@@ -53,11 +56,13 @@ def strip_control_prefix(message):
         message = message.split(prefix, 1)[1].strip()
     return message
 
+
 def has_control_prefix(message):
     for CONTROL_PREFIX in CONTROL_PREFIXES:
         if message.startswith(f"{CONTROL_PREFIX} "):
             return CONTROL_PREFIX
     return False
+
 
 def parse_commands(messages):
     commands = defaultdict(list)
@@ -97,27 +102,33 @@ def parse_commands(messages):
 
 
 def action_commands(commands):
-    for group_id in commands:
-        for command in commands[group_id]:
+    for target in commands:
+        for command in commands[target]:
+            message = command
+            command = command.lower()
             logger.info(f"processing command: {command}")
             if profanity.contains_profanity(command):
-                send_message("Don't be rude or I'll eat all your crypto.", SIGNAL_USER, group_id)
-            elif command.lower() == "help":
-                send_message(textwrap.dedent(HELP_TEXT), SIGNAL_USER, group_id)
+                send_message("Don't be rude or I'll eat all your crypto.", SIGNAL_USER, target)
+            elif command == "help":
+                send_message(textwrap.dedent(HELP_TEXT), SIGNAL_USER, target)
             elif command.startswith("getprice") or command.startswith("gp"):
                 sep = command.startswith("gp") and "gp" or "getprice"
                 symbol = command.split(sep)[1].strip()
                 if not 3 <= len(symbol) <= 4  or not symbol.isalpha():
-                    send_message("Symbol must contain alpha characters only and be 3 or 4 characters in length.", SIGNAL_USER, group_id)
+                    send_message("Symbol must contain alpha characters only and be 3 or 4 characters in length.", SIGNAL_USER, target)
                     continue
                 logger.debug(f"Fetching price for symbol: {symbol}")
                 p = subprocess.Popen(f"""coinmon -f {symbol} | tail -n2 | head -n1 | awk '{{print $6}}'""", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
                 result = p.stdout.read().decode('utf-8').strip()
-                send_message(f"1 {symbol} = USD ${result}", SIGNAL_USER, group_id)
+                if result:
+                    message = f"1 {symbol} = USD ${result}"
+                else:
+                    message = f"I've got no info about crypto symbol '{symbol}'"
+                send_message(message, SIGNAL_USER, target)
             else:
-                response = cb.single_exchange(command)
-                send_message(response, SIGNAL_USER, group_id)
+                response = cb.single_exchange(message)
+                send_message(response, SIGNAL_USER, target)
 
 
 def get_messages():
@@ -136,5 +147,5 @@ if __name__ == "__main__":
         commands = parse_commands(input_data)
         if commands:
             action_commands(commands)
-        time.sleep(2)
+        time.sleep(SLEEP)
 

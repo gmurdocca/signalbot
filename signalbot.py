@@ -53,7 +53,7 @@ def send_message(message, from_user, target):
         # group chat
         cmd = f'''signal-cli -u {from_user} send -m '{message}' -g "{target}"'''
     logger.debug(f"running command: {cmd}")
-    subprocess.call(cmd, shell=True)
+    subprocess.Popen(cmd, shell=True, close_fds=True).wait()
     
 
 def strip_control_prefix(message):

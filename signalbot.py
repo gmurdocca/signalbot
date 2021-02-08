@@ -17,6 +17,8 @@ import dotenv
 CONTROL_PREFIXES = ["!signalbot", "!sb", "!dojobot", "!db"]
 LOGLEVEL = logging.INFO
 SLEEP = 2
+RECEIVE_TIMEOUT = 2
+UPDATE_ACCOUNT_INTERVAL = 30
 
 cb = cleverbotfree.cbfree.Cleverbot()
 
@@ -136,7 +138,7 @@ def action_commands(commands):
 
 
 def get_messages():
-    cmd = f"signal-cli -u {SIGNAL_USER} --output=json receive"
+    cmd = f"signal-cli -u {SIGNAL_USER} --output=json receive --timeout {RECEIVE_TIMEOUT} --ignore-attachments"
     p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
     p.wait()
     result = p.stdout.read().decode('utf-8')
@@ -144,12 +146,16 @@ def get_messages():
 
 
 if __name__ == "__main__":
+    # main loop
+    update_account_timer = time.time()
     while True:
-        sys.stdout.write(".")
-        sys.stdout.flush()
         input_data = get_messages()
         commands = parse_commands(input_data)
         if commands:
             action_commands(commands)
         time.sleep(SLEEP)
-
+        # fix issue with direct messages
+        if time.time() - update_account_timer > UPDATE_ACCOUNT_INTERVAL:
+            logger.debug("Updating signal account")
+            subprocess.Popen(f"signal-cli -u {SIGNAL_USER} updateAccount", shell=True, close_fds=True).wait()
+            update_account_timer = time.time()

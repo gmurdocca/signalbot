@@ -147,6 +147,7 @@ def get_messages():
 
 if __name__ == "__main__":
     # main loop
+    logger.info("Starting to waiting for messages...")
     update_account_timer = time.time()
     while True:
         input_data = get_messages()

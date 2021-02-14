@@ -129,7 +129,7 @@ def action_commands(commands):
                 result = p.stdout.read().decode('utf-8').strip()
                 if result:
                     rank, coin, price, change24h, marketcap, supply, volume24h = result.split()
-                    message = f"Coin: {coin}\nRank: {rank}\nPrice: {price}\nChange 24h: {change24h}\nMarket Cap: {marketcap}\nSupply: {supply}\nVolume 24h: {volume24h}"
+                    message = f"Coin: {coin}\nRank: {rank}\nPrice USD: ${price}\nChange 24h: {change24h}\nMarket Cap: {marketcap}\nSupply: {supply}\nVolume 24h: {volume24h}"
                 else:
                     message = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
                 send_message(message, SIGNAL_USER, target)

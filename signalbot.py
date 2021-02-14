@@ -124,11 +124,12 @@ def action_commands(commands):
                     send_message("Symbol must contain alpha characters only and be 3 or 4 characters in length.", SIGNAL_USER, target)
                     continue
                 logger.debug(f"Fetching price for symbol: {symbol}")
-                p = subprocess.Popen(f"""coinmon -f {symbol} | tail -n2 | head -n1 | awk '{{print $6}}'""", shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+                p = subprocess.Popen("""coinmon -f %s | tail -n2 | head -n1 | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'  | awk '{print $2, $4, $6, $8, $10, $12, $14}'""" % symbol, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
                 result = p.stdout.read().decode('utf-8').strip()
                 if result:
-                    message = f"1 {symbol} = USD ${result}"
+                    rank, coin, price, change24h, marketcap, supply, volume24h = result.split()
+                    message = f"Coin: {coin}\nRank: {rank}\nPrice: {price}\nChange 24h: {change24h}\nMarket Cap: {marketcap}\nSupply: {supply}\nVolume 24h: {volume24h}"
                 else:
                     message = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
                 send_message(message, SIGNAL_USER, target)

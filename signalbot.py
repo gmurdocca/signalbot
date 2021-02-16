@@ -14,13 +14,14 @@ import cleverbotfree.cbfree
 from better_profanity import profanity
 import dotenv
 
-CONTROL_PREFIXES = ["!signalbot", "!sb", "!dojobot", "!db"]
+CONTROL_PREFIXES = ["!signalbot", "!sb", "!dojobot", "!db", "!do"]
 LOGLEVEL = logging.INFO
 SLEEP = 2
 RECEIVE_TIMEOUT = 2
 UPDATE_ACCOUNT_INTERVAL = 30
 
 cb = cleverbotfree.cbfree.Cleverbot()
+working_dir = os.path.realpath(__file__)
 
 logger = logging.getLogger()
 logger.setLevel(LOGLEVEL)
@@ -36,7 +37,8 @@ SIGNAL_USER = os.getenv("SIGNAL_USER")
 HELP_TEXT = """
         Commands I understand:\n
         Get a crypto price:    !sb gp <symbol>
-        Chat with me:    !sb <some message>
+        Ask about crypto: !sb q <your question>
+        Chat with me:    !sb <your message>
 
         See coincap.io for supported symbols
         """
@@ -110,21 +112,21 @@ def parse_commands(messages):
 def action_commands(commands):
     for target in commands:
         for command in commands[target]:
-            message = command
-            command = command.lower()
-            logger.info(f"processing command: {command}")
-            if profanity.contains_profanity(command):
+            command_l = command.lower()
+            logger.info(f"processing command: {command_l}")
+            if profanity.contains_profanity(command_l):
                 send_message("Don't be rude or I'll eat all your crypto.", SIGNAL_USER, target)
-            elif command == "help":
+            elif command_l == "help":
                 send_message(textwrap.dedent(HELP_TEXT), SIGNAL_USER, target)
-            elif command.startswith("getprice") or command.startswith("gp"):
-                sep = command.startswith("gp") and "gp" or "getprice"
-                symbol = command.split(sep)[1].strip()
+            elif command_l.startswith("getprice") or command_l.startswith("gp"):
+                sep = command_l.startswith("gp") and "gp" or "getprice"
+                symbol = command_l.split(sep)[1].strip()
                 if not 3 <= len(symbol) <= 4  or not symbol.isalpha():
                     send_message("Symbol must contain alpha characters only and be 3 or 4 characters in length.", SIGNAL_USER, target)
                     continue
+                cmd = """coinmon -f %s | tail -n2 | head -n1 | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'  | awk '{print $2, $4, $6, $8, $10, $12, $14}'""" % symbol
                 logger.debug(f"Fetching price for symbol: {symbol}")
-                p = subprocess.Popen("""coinmon -f %s | tail -n2 | head -n1 | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g'  | awk '{print $2, $4, $6, $8, $10, $12, $14}'""" % symbol, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+                p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
                 result = p.stdout.read().decode('utf-8').strip()
                 if result:
@@ -133,6 +135,12 @@ def action_commands(commands):
                 else:
                     message = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
                 send_message(message, SIGNAL_USER, target)
+
+            elif command_l.startswith("q"):
+                cmd = f"{working_dir}/tuxi 'crypto {command}'"
+                p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+                p.wait()
+                result = p.stdout.read().decode('utf-8').strip()
             else:
                 response = cb.single_exchange(message)
                 send_message(response, SIGNAL_USER, target)

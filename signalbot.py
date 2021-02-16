@@ -37,8 +37,8 @@ SIGNAL_USER = os.getenv("SIGNAL_USER")
 HELP_TEXT = """
         Commands I understand:\n
         Get a crypto price:    !sb gp <symbol>
-        Ask about crypto: !sb q <your question>
-        Chat with me:    !sb <your message>
+        Ask about crypto: !sb <your question>
+        Chat with AI:    !sb ai <your message>
 
         See coincap.io for supported symbols
         """
@@ -135,15 +135,14 @@ def action_commands(commands):
                 else:
                     response = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
                 send_response(response, SIGNAL_USER, target)
-
-            elif command_l.startswith("q"):
+            elif command_l.startswith("ai"):
+                response = cb.single_exchange(command)
+                send_message(response, SIGNAL_USER, target)
+            else:
                 cmd = f"{working_dir}/tuxi 'crypto {command}'"
                 p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
                 response = p.stdout.read().decode('utf-8').strip()
-                send_message(response, SIGNAL_USER, target)
-            else:
-                response = cb.single_exchange(command)
                 send_message(response, SIGNAL_USER, target)
 
 

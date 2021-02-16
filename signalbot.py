@@ -21,7 +21,7 @@ RECEIVE_TIMEOUT = 2
 UPDATE_ACCOUNT_INTERVAL = 30
 
 cb = cleverbotfree.cbfree.Cleverbot()
-working_dir = os.path.realpath(__file__)
+working_dir = os.path.dirname(os.path.realpath(__file__))
 
 logger = logging.getLogger()
 logger.setLevel(LOGLEVEL)

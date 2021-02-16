@@ -134,7 +134,7 @@ def action_commands(commands):
                     response = f"Coin: {coin}\nRank: {rank}\nPrice USD: ${price}\nChange 24h: {change24h}\nMarket Cap: {marketcap}\nSupply: {supply}\nVolume 24h: {volume24h}"
                 else:
                     response = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
-                send_response(response, SIGNAL_USER, target)
+                send_message(response, SIGNAL_USER, target)
             elif command_l.startswith("ai"):
                 response = cb.single_exchange(command)
                 send_message(response, SIGNAL_USER, target)

@@ -131,18 +131,19 @@ def action_commands(commands):
                 result = p.stdout.read().decode('utf-8').strip()
                 if result:
                     rank, coin, price, change24h, marketcap, supply, volume24h = result.split()
-                    message = f"Coin: {coin}\nRank: {rank}\nPrice USD: ${price}\nChange 24h: {change24h}\nMarket Cap: {marketcap}\nSupply: {supply}\nVolume 24h: {volume24h}"
+                    response = f"Coin: {coin}\nRank: {rank}\nPrice USD: ${price}\nChange 24h: {change24h}\nMarket Cap: {marketcap}\nSupply: {supply}\nVolume 24h: {volume24h}"
                 else:
-                    message = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
-                send_message(message, SIGNAL_USER, target)
+                    response = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
+                send_response(response, SIGNAL_USER, target)
 
             elif command_l.startswith("q"):
                 cmd = f"{working_dir}/tuxi 'crypto {command}'"
                 p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
-                result = p.stdout.read().decode('utf-8').strip()
+                response = p.stdout.read().decode('utf-8').strip()
+                send_message(response, SIGNAL_USER, target)
             else:
-                response = cb.single_exchange(message)
+                response = cb.single_exchange(command)
                 send_message(response, SIGNAL_USER, target)
 
 

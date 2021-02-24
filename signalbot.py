@@ -36,9 +36,8 @@ dotenv.load_dotenv(dotenv_path=Path('.') / '.env')
 SIGNAL_USER = os.getenv("SIGNAL_USER")
 HELP_TEXT = """
         Commands I understand:\n
-        Get a crypto price:    !sb gp <symbol>
-        Ask about crypto: !sb <your question>
-        Chat with AI:    !sb ai <your message>
+        Get a crypto price:    !sb gp <crypto-symbol>
+        Ask me anything:    !sb <your-message>
 
         See coincap.io for supported symbols
         """
@@ -134,9 +133,6 @@ def action_commands(commands):
                     response = f"Coin: {coin}\nRank: {rank}\nPrice USD: ${price}\nChange 24h: {change24h}\nMarket Cap: {marketcap}\nSupply: {supply}\nVolume 24h: {volume24h}"
                 else:
                     response = f"I've got no info about crypto symbol '{symbol}'. See coincap.io for a list of supported symbols."
-                send_message(response, SIGNAL_USER, target)
-            elif command_l.startswith("ai"):
-                response = cb.single_exchange(command)
                 send_message(response, SIGNAL_USER, target)
             else:
                 cmd = f"{working_dir}/tuxi '{command}'"

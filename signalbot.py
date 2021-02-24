@@ -143,6 +143,9 @@ def action_commands(commands):
                 p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
                 response = p.stdout.read().decode('utf-8').strip()
+                if response == "No Result":
+                    # just pass the question to the AI
+                    response = f"Can't find anything in google snippets, however, {cb.single_exchange(command).lower()}"
                 send_message(response, SIGNAL_USER, target)
 
 

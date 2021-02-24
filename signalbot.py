@@ -144,8 +144,8 @@ def action_commands(commands):
                 p.wait()
                 response = p.stdout.read().decode('utf-8').strip()
                 if response == "No Result":
-                    # just pass the question to the AI
-                    response = f"Can't find anything in google snippets, however, {cb.single_exchange(command).lower()}"
+                    # just pass the question to the AI if Google doesn't have a featured snippet response
+                    response = cb.single_exchange(command)
                 send_message(response, SIGNAL_USER, target)
 
 

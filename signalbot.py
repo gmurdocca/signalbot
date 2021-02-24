@@ -139,7 +139,7 @@ def action_commands(commands):
                 response = cb.single_exchange(command)
                 send_message(response, SIGNAL_USER, target)
             else:
-                cmd = f"{working_dir}/tuxi 'crypto {command}'"
+                cmd = f"{working_dir}/tuxi '{command}'"
                 p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
                 response = p.stdout.read().decode('utf-8').strip()

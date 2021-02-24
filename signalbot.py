@@ -138,7 +138,7 @@ def action_commands(commands):
                 cmd = f"{working_dir}/tuxi '{command}'"
                 p = subprocess.Popen(cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
                 p.wait()
-                response = p.stdout.read().decode('utf-8').strip()
+                response = p.stdout.read().decode('utf-8').strip().replace('\n', ' ')
                 if response == "No Result":
                     # just pass the question to the AI if Google doesn't have a featured snippet response
                     response = cb.single_exchange(command)
